@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/asaremote"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/common"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/fsremote"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/gcsremote"
@@ -14,6 +15,7 @@ import (
 )
 
 var (
+	accessKey     = flag.String("accessKey", "", "Azure Storage Account Access Key to allow for accessing storage account for handling backups")
 	credsFilePath = flag.String("credsFilePath", "", "Path to file with GCS or S3 credentials. Credentials are loaded from default locations if not set.\n"+
 		"See https://cloud.google.com/iam/docs/creating-managing-service-account-keys and https://docs.aws.amazon.com/general/latest/gr/aws-security-credentials.html")
 	configFilePath = flag.String("configFilePath", "", "Path to file with S3 configs. Configs are loaded from default location if not set.\n"+
@@ -227,6 +229,19 @@ func NewRemoteFS(path string) (common.RemoteFS, error) {
 		}
 		if err := fs.Init(); err != nil {
 			return nil, fmt.Errorf("cannot initialize connection to s3: %s", err)
+		}
+		return fs, nil
+	case "asa":
+		n := strings.Index(dir, "/")
+		if n < 0 {
+			return nil, fmt.Errorf("missing container on the Azure storage accoutn %q", dir)
+		}
+		storageAccout := dir[:n]
+		container := dir[n:]
+		fs := &asaremote.FS{
+			AccessKey:      *accessKey,
+			StorageAccount: storageAccout,
+			Container:      container,
 		}
 		return fs, nil
 	default:

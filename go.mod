@@ -2,6 +2,7 @@ module github.com/VictoriaMetrics/VictoriaMetrics
 
 require (
 	cloud.google.com/go/storage v1.6.0
+	github.com/Azure/azure-storage-blob-go v0.8.0
 	github.com/VictoriaMetrics/fastcache v1.5.7
 	github.com/VictoriaMetrics/metrics v1.11.0
 	github.com/aws/aws-sdk-go v1.29.10
